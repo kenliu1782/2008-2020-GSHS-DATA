@@ -1,0 +1,589 @@
+---
+title: "data_cleaning"
+author: "Ken Liu"
+date: "2/22/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(foreach)
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(tibble)
+```
+
+
+```{r}
+library(haven)
+gshs.data.full <- foreach(year=2008:2014, .combine="rbind.fill") %do% {
+    filename <- paste0("~/Desktop/INTERNSHIP/data/gshs_",year, ".dta")
+    this.data1 <- read_dta(filename)
+    this.data1 <- this.data1 %>% rename_with(tolower)
+    this.data1
+}
+gshs_08_14 <- gshs.data.full
+gshs_08_14 <- gshs_08_14 %>%
+                  filter(grade>8)
+```
+
+```{r}
+# merge friends where
+gshs_08_14$friendsusewhere1aa <- ifelse(rowSums(gshs_08_14[,70:75], na.rm = T)==1 & gshs_08_14$friendsusewhere1a == 1, 0, 7)
+gshs_08_14$friendsusewhere1bb <- ifelse(rowSums(gshs_08_14[,70:75], na.rm = T)==1 & gshs_08_14$friendsusewhere1b == 1, 1, 7)
+gshs_08_14$friendsusewhere1cc <- ifelse(rowSums(gshs_08_14[,70:75], na.rm = T)==1 & gshs_08_14$friendsusewhere1c == 1, 2, 7)
+gshs_08_14$friendsusewhere1dd <- ifelse(rowSums(gshs_08_14[,70:75], na.rm = T)==1 & gshs_08_14$friendsusewhere1d == 1, 3, 7)
+gshs_08_14$friendsusewhere1ee <- ifelse(rowSums(gshs_08_14[,70:75], na.rm = T)==1 & gshs_08_14$friendsusewhere1e == 1, 4, 7)
+gshs_08_14$friendsusewhere1ff <- ifelse(rowSums(gshs_08_14[,70:75], na.rm = T)==1 & gshs_08_14$friendsusewhere1f == 1, 5, 7)
+gshs_08_14$friendsusewhere2aa <- ifelse(rowSums(gshs_08_14[,76:81], na.rm = T)==1 & gshs_08_14$friendsusewhere2a == 1, 0, 7)
+gshs_08_14$friendsusewhere2bb <- ifelse(rowSums(gshs_08_14[,76:81], na.rm = T)==1 & gshs_08_14$friendsusewhere2b == 1, 1, 7)
+gshs_08_14$friendsusewhere2cc <- ifelse(rowSums(gshs_08_14[,76:81], na.rm = T)==1 & gshs_08_14$friendsusewhere2c == 1, 2, 7)
+gshs_08_14$friendsusewhere2dd <- ifelse(rowSums(gshs_08_14[,76:81], na.rm = T)==1 & gshs_08_14$friendsusewhere2d == 1, 3, 7)
+gshs_08_14$friendsusewhere2ee <- ifelse(rowSums(gshs_08_14[,76:81], na.rm = T)==1 & gshs_08_14$friendsusewhere2e == 1, 4, 7)
+gshs_08_14$friendsusewhere2ff <- ifelse(rowSums(gshs_08_14[,76:81], na.rm = T)==1 & gshs_08_14$friendsusewhere2f == 1, 5, 7)
+gshs_08_14$friendsusewhere3aa <- ifelse(rowSums(gshs_08_14[,82:87], na.rm = T)==1 & gshs_08_14$friendsusewhere3a == 1, 0, 7)
+gshs_08_14$friendsusewhere3bb <- ifelse(rowSums(gshs_08_14[,82:87], na.rm = T)==1 & gshs_08_14$friendsusewhere3b == 1, 1, 7)
+gshs_08_14$friendsusewhere3cc <- ifelse(rowSums(gshs_08_14[,82:87], na.rm = T)==1 & gshs_08_14$friendsusewhere3c == 1, 2, 7)
+gshs_08_14$friendsusewhere3dd <- ifelse(rowSums(gshs_08_14[,82:87], na.rm = T)==1 & gshs_08_14$friendsusewhere3d == 1, 3, 7)
+gshs_08_14$friendsusewhere3ee <- ifelse(rowSums(gshs_08_14[,82:87], na.rm = T)==1 & gshs_08_14$friendsusewhere3e == 1, 4, 7)
+gshs_08_14$friendsusewhere3ff <- ifelse(rowSums(gshs_08_14[,82:87], na.rm = T)==1 & gshs_08_14$friendsusewhere3f == 1, 5, 7)
+gshs_08_14$friendsusewhere4aa <- ifelse(rowSums(gshs_08_14[,88:93], na.rm = T)==1 & gshs_08_14$friendsusewhere4a == 1, 0, 7)
+gshs_08_14$friendsusewhere4bb <- ifelse(rowSums(gshs_08_14[,88:93], na.rm = T)==1 & gshs_08_14$friendsusewhere4b == 1, 1, 7)
+gshs_08_14$friendsusewhere4cc <- ifelse(rowSums(gshs_08_14[,88:93], na.rm = T)==1 & gshs_08_14$friendsusewhere4c == 1, 2, 7)
+gshs_08_14$friendsusewhere4dd <- ifelse(rowSums(gshs_08_14[,88:93], na.rm = T)==1 & gshs_08_14$friendsusewhere4d == 1, 3, 7)
+gshs_08_14$friendsusewhere4ee <- ifelse(rowSums(gshs_08_14[,88:93], na.rm = T)==1 & gshs_08_14$friendsusewhere4e == 1, 4, 7)
+gshs_08_14$friendsusewhere4ff <- ifelse(rowSums(gshs_08_14[,88:93], na.rm = T)==1 & gshs_08_14$friendsusewhere4f == 1, 5, 7)
+gshs_08_14 <- gshs_08_14 %>%
+  mutate(friendsusewhere1 = coalesce(friendsusewhere1aa, 
+                                     friendsusewhere1bb, 
+                                     friendsusewhere1cc, 
+                                     friendsusewhere1dd, 
+                                     friendsusewhere1ee, 
+                                     friendsusewhere1ff),
+         friendsusewhere2 = coalesce(friendsusewhere2aa, 
+                                     friendsusewhere2bb, 
+                                     friendsusewhere2cc, 
+                                     friendsusewhere2dd, 
+                                     friendsusewhere2ee, 
+                                     friendsusewhere2ff),
+         friendsusewhere3 = coalesce(friendsusewhere3aa, 
+                                     friendsusewhere3bb, 
+                                     friendsusewhere3cc, 
+                                     friendsusewhere3dd, 
+                                     friendsusewhere3ee, 
+                                     friendsusewhere3ff),
+         friendsusewhere4 = coalesce(friendsusewhere4aa, 
+                                     friendsusewhere4bb, 
+                                     friendsusewhere4cc, 
+                                     friendsusewhere4dd, 
+                                     friendsusewhere4ee, 
+                                     friendsusewhere4ff)) %>%
+  select(-friendsusewhere1aa, 
+         -friendsusewhere1bb, 
+         -friendsusewhere1cc, 
+         -friendsusewhere1dd, 
+         -friendsusewhere1ee, 
+         -friendsusewhere1ff,
+         -friendsusewhere2aa, 
+         -friendsusewhere2bb, 
+         -friendsusewhere2cc, 
+         -friendsusewhere2dd, 
+         -friendsusewhere2ee, 
+         -friendsusewhere2ff,
+         -friendsusewhere3aa, 
+         -friendsusewhere3bb, 
+         -friendsusewhere3cc, 
+         -friendsusewhere3dd, 
+         -friendsusewhere3ee, 
+         -friendsusewhere3ff,
+         -friendsusewhere4aa, 
+         -friendsusewhere4bb, 
+         -friendsusewhere4cc, 
+         -friendsusewhere4dd, 
+         -friendsusewhere4ee, 
+         -friendsusewhere4ff,
+         -friendsusewhere1a, 
+         -friendsusewhere1b, 
+         -friendsusewhere1c, 
+         -friendsusewhere1d, 
+         -friendsusewhere1e, 
+         -friendsusewhere1f,
+         -friendsusewhere2a, 
+         -friendsusewhere2b, 
+         -friendsusewhere2c, 
+         -friendsusewhere2d, 
+         -friendsusewhere2e, 
+         -friendsusewhere2f,
+         -friendsusewhere3a, 
+         -friendsusewhere3b, 
+         -friendsusewhere3c, 
+         -friendsusewhere3d, 
+         -friendsusewhere3e, 
+         -friendsusewhere3f,
+         -friendsusewhere4a, 
+         -friendsusewhere4b, 
+         -friendsusewhere4c, 
+         -friendsusewhere4d, 
+         -friendsusewhere4e, 
+         -friendsusewhere4f)
+```
+
+```{r}
+# merge friends when
+gshs_08_14$friendsusewhen1aa <- ifelse(rowSums(gshs_08_14[,70:75], na.rm = T)==1 & gshs_08_14$friendsusewhen1a == 1, 0, 7)
+gshs_08_14$friendsusewhen1bb <- ifelse(rowSums(gshs_08_14[,70:75], na.rm = T)==1 & gshs_08_14$friendsusewhen1b == 1, 1, 7)
+gshs_08_14$friendsusewhen1cc <- ifelse(rowSums(gshs_08_14[,70:75], na.rm = T)==1 & gshs_08_14$friendsusewhen1c == 1, 2, 7)
+gshs_08_14$friendsusewhen1dd <- ifelse(rowSums(gshs_08_14[,70:75], na.rm = T)==1 & gshs_08_14$friendsusewhen1d == 1, 3, 7)
+gshs_08_14$friendsusewhen1ee <- ifelse(rowSums(gshs_08_14[,70:75], na.rm = T)==1 & gshs_08_14$friendsusewhen1e == 1, 4, 7)
+gshs_08_14$friendsusewhen1ff <- ifelse(rowSums(gshs_08_14[,70:75], na.rm = T)==1 & gshs_08_14$friendsusewhen1f == 1, 5, 7)
+gshs_08_14$friendsusewhen2aa <- ifelse(rowSums(gshs_08_14[,76:81], na.rm = T)==1 & gshs_08_14$friendsusewhen2a == 1, 0, 7)
+gshs_08_14$friendsusewhen2bb <- ifelse(rowSums(gshs_08_14[,76:81], na.rm = T)==1 & gshs_08_14$friendsusewhen2b == 1, 1, 7)
+gshs_08_14$friendsusewhen2cc <- ifelse(rowSums(gshs_08_14[,76:81], na.rm = T)==1 & gshs_08_14$friendsusewhen2c == 1, 2, 7)
+gshs_08_14$friendsusewhen2dd <- ifelse(rowSums(gshs_08_14[,76:81], na.rm = T)==1 & gshs_08_14$friendsusewhen2d == 1, 3, 7)
+gshs_08_14$friendsusewhen2ee <- ifelse(rowSums(gshs_08_14[,76:81], na.rm = T)==1 & gshs_08_14$friendsusewhen2e == 1, 4, 7)
+gshs_08_14$friendsusewhen2ff <- ifelse(rowSums(gshs_08_14[,76:81], na.rm = T)==1 & gshs_08_14$friendsusewhen2f == 1, 5, 7)
+gshs_08_14$friendsusewhen3aa <- ifelse(rowSums(gshs_08_14[,82:87], na.rm = T)==1 & gshs_08_14$friendsusewhen3a == 1, 0, 7)
+gshs_08_14$friendsusewhen3bb <- ifelse(rowSums(gshs_08_14[,82:87], na.rm = T)==1 & gshs_08_14$friendsusewhen3b == 1, 1, 7)
+gshs_08_14$friendsusewhen3cc <- ifelse(rowSums(gshs_08_14[,82:87], na.rm = T)==1 & gshs_08_14$friendsusewhen3c == 1, 2, 7)
+gshs_08_14$friendsusewhen3dd <- ifelse(rowSums(gshs_08_14[,82:87], na.rm = T)==1 & gshs_08_14$friendsusewhen3d == 1, 3, 7)
+gshs_08_14$friendsusewhen3ee <- ifelse(rowSums(gshs_08_14[,82:87], na.rm = T)==1 & gshs_08_14$friendsusewhen3e == 1, 4, 7)
+gshs_08_14$friendsusewhen3ff <- ifelse(rowSums(gshs_08_14[,82:87], na.rm = T)==1 & gshs_08_14$friendsusewhen3f == 1, 5, 7)
+gshs_08_14$friendsusewhen4aa <- ifelse(rowSums(gshs_08_14[,88:93], na.rm = T)==1 & gshs_08_14$friendsusewhen4a == 1, 0, 7)
+gshs_08_14$friendsusewhen4bb <- ifelse(rowSums(gshs_08_14[,88:93], na.rm = T)==1 & gshs_08_14$friendsusewhen4b == 1, 1, 7)
+gshs_08_14$friendsusewhen4cc <- ifelse(rowSums(gshs_08_14[,88:93], na.rm = T)==1 & gshs_08_14$friendsusewhen4c == 1, 2, 7)
+gshs_08_14$friendsusewhen4dd <- ifelse(rowSums(gshs_08_14[,88:93], na.rm = T)==1 & gshs_08_14$friendsusewhen4d == 1, 3, 7)
+gshs_08_14$friendsusewhen4ee <- ifelse(rowSums(gshs_08_14[,88:93], na.rm = T)==1 & gshs_08_14$friendsusewhen4e == 1, 4, 7)
+gshs_08_14$friendsusewhen4ff <- ifelse(rowSums(gshs_08_14[,88:93], na.rm = T)==1 & gshs_08_14$friendsusewhen4f == 1, 5, 7)
+gshs_08_14 <- gshs_08_14 %>%
+  mutate(friendsusewhen1 = coalesce(friendsusewhen1aa, 
+                                     friendsusewhen1bb, 
+                                     friendsusewhen1cc, 
+                                     friendsusewhen1dd, 
+                                     friendsusewhen1ee, 
+                                     friendsusewhen1ff),
+         friendsusewhen2 = coalesce(friendsusewhen2aa, 
+                                     friendsusewhen2bb, 
+                                     friendsusewhen2cc, 
+                                     friendsusewhen2dd, 
+                                     friendsusewhen2ee, 
+                                     friendsusewhen2ff),
+         friendsusewhen3 = coalesce(friendsusewhen3aa, 
+                                     friendsusewhen3bb, 
+                                     friendsusewhen3cc, 
+                                     friendsusewhen3dd, 
+                                     friendsusewhen3ee, 
+                                     friendsusewhen3ff),
+         friendsusewhen4 = coalesce(friendsusewhen4aa, 
+                                     friendsusewhen4bb, 
+                                     friendsusewhen4cc, 
+                                     friendsusewhen4dd, 
+                                     friendsusewhen4ee, 
+                                     friendsusewhen4ff)) %>%
+  select(-friendsusewhen1aa, 
+         -friendsusewhen1bb, 
+         -friendsusewhen1cc, 
+         -friendsusewhen1dd, 
+         -friendsusewhen1ee, 
+         -friendsusewhen1ff,
+         -friendsusewhen2aa, 
+         -friendsusewhen2bb, 
+         -friendsusewhen2cc, 
+         -friendsusewhen2dd, 
+         -friendsusewhen2ee, 
+         -friendsusewhen2ff,
+         -friendsusewhen3aa, 
+         -friendsusewhen3bb, 
+         -friendsusewhen3cc, 
+         -friendsusewhen3dd, 
+         -friendsusewhen3ee, 
+         -friendsusewhen3ff,
+         -friendsusewhen4aa, 
+         -friendsusewhen4bb, 
+         -friendsusewhen4cc, 
+         -friendsusewhen4dd, 
+         -friendsusewhen4ee, 
+         -friendsusewhen4ff,
+         -friendsusewhen1a, 
+         -friendsusewhen1b, 
+         -friendsusewhen1c, 
+         -friendsusewhen1d, 
+         -friendsusewhen1e, 
+         -friendsusewhen1f,
+         -friendsusewhen2a, 
+         -friendsusewhen2b, 
+         -friendsusewhen2c, 
+         -friendsusewhen2d, 
+         -friendsusewhen2e, 
+         -friendsusewhen2f,
+         -friendsusewhen3a, 
+         -friendsusewhen3b, 
+         -friendsusewhen3c, 
+         -friendsusewhen3d, 
+         -friendsusewhen3e, 
+         -friendsusewhen3f,
+         -friendsusewhen4a, 
+         -friendsusewhen4b, 
+         -friendsusewhen4c, 
+         -friendsusewhen4d, 
+         -friendsusewhen4e, 
+         -friendsusewhen4f)
+```
+
+```{r}
+# merge the values greater than 5 to 5
+gshs_08_14$friendsusewhen1 <- replace(gshs_08_14$friendsusewhen1, gshs_08_14$friendsusewhen1 > 5, 5)
+gshs_08_14$friendsusewhen2 <- replace(gshs_08_14$friendsusewhen2, gshs_08_14$friendsusewhen2 > 5, 5)
+gshs_08_14$friendsusewhen3 <- replace(gshs_08_14$friendsusewhen3, gshs_08_14$friendsusewhen3 > 5, 5)
+gshs_08_14$friendsusewhen4 <- replace(gshs_08_14$friendsusewhen4, gshs_08_14$friendsusewhen4 > 5, 5)
+gshs_08_14$friendsusewhere1 <- replace(gshs_08_14$friendsusewhere1, gshs_08_14$friendsusewhere1 > 5, 5)
+gshs_08_14$friendsusewhere2 <- replace(gshs_08_14$friendsusewhere2, gshs_08_14$friendsusewhere2 > 5, 5)
+gshs_08_14$friendsusewhere3 <- replace(gshs_08_14$friendsusewhere3, gshs_08_14$friendsusewhere3 > 5, 5)
+gshs_08_14$friendsusewhere4 <- replace(gshs_08_14$friendsusewhere4, gshs_08_14$friendsusewhere4 > 5, 5)
+```
+
+```{r}
+# reorder the questions
+gshs_08_14 <- add_column(gshs_08_14, where1 = gshs_08_14$friendsusewhere1, .after = "friendsdisapprove4")
+gshs_08_14 <- add_column(gshs_08_14, where2 = gshs_08_14$friendsusewhere2, .after = "where1")
+gshs_08_14 <- add_column(gshs_08_14, where3 = gshs_08_14$friendsusewhere3, .after = "where2")
+gshs_08_14 <- add_column(gshs_08_14, where4 = gshs_08_14$friendsusewhere4, .after = "where3")
+gshs_08_14 <- add_column(gshs_08_14, when1 = gshs_08_14$friendsusewhen4, .after = "where4")
+gshs_08_14 <- add_column(gshs_08_14, when2 = gshs_08_14$friendsusewhen2, .after = "when1")
+gshs_08_14 <- add_column(gshs_08_14, when3 = gshs_08_14$friendsusewhen3, .after = "when2")
+gshs_08_14 <- add_column(gshs_08_14, when4 = gshs_08_14$friendsusewhen4, .after = "when3")
+gshs_08_14 <- gshs_08_14 %>%
+  select(-friendsusewhen1, 
+         -friendsusewhen2, 
+         -friendsusewhen3, 
+         -friendsusewhen4,
+         -friendsusewhere1, 
+         -friendsusewhere2, 
+         -friendsusewhere3, 
+         -friendsusewhere4)
+```
+
+```{r}
+gshs_08_14 <- gshs_08_14 %>%
+  mutate(past30use1= case_when(
+    past30use1 == 0 ~ 0,
+    past30use1 == 1|past30use1 == 2|past30use1 == 3|past30use1 == 4|past30use1 == 5 ~ 1,
+    past30use1 == 6|past30use1 == 7|past30use1 == 8|past30use1 == 9|past30use1 == 10 ~ 2,
+    past30use1 == 11|past30use1 == 12|past30use1 == 13|past30use1 == 14|past30use1 == 15|past30use1 == 16|past30use1 == 17|past30use1 == 18|past30use1 == 19|past30use1 == 20 ~ 3,
+    past30use1 == 21|past30use1 == 22|past30use1 == 23|past30use1 == 24|past30use1 == 25|past30use1 == 26|past30use1 == 27|past30use1 == 28|past30use1 == 29|past30use1 == 30 ~ 4),
+  past30use2= case_when(
+    past30use2 == 0 ~ 0,
+    past30use2 == 1|past30use2 == 2|past30use2 == 3|past30use2 == 4|past30use2 == 5 ~ 1,
+    past30use2 == 6|past30use2 == 7|past30use2 == 8|past30use2 == 9|past30use2 == 10 ~ 2,
+    past30use2 == 11|past30use2 == 12|past30use2 == 13|past30use2 == 14|past30use2 == 15|past30use2 == 16|past30use2 == 17|past30use2 == 18|past30use2 == 19|past30use2 == 20 ~ 3,
+    past30use2 == 21|past30use2 == 22|past30use2 == 23|past30use2 == 24|past30use2 == 25|past30use2 == 26|past30use2 == 27|past30use2 == 28|past30use2 == 29|past30use2 == 30 ~ 4),
+  past30use3= case_when(
+    past30use3 == 0 ~ 0,
+    past30use3 == 1|past30use3 == 2|past30use3 == 3|past30use3 == 4|past30use3 == 5 ~ 1,
+    past30use3 == 6|past30use3 == 7|past30use3 == 8|past30use3 == 9|past30use3 == 10 ~ 2,
+    past30use3 == 11|past30use3 == 12|past30use3 == 13|past30use3 == 14|past30use3 == 15|past30use3 == 16|past30use3 == 17|past30use3 == 18|past30use3 == 19|past30use3 == 20 ~ 3,
+    past30use3 == 21|past30use3 == 22|past30use3 == 23|past30use3 == 24|past30use3 == 25|past30use3 == 26|past30use3 == 27|past30use3 == 28|past30use3 == 29|past30use3 == 30 ~ 4),
+    past30use4= case_when(
+    past30use4 == 0 ~ 0,
+    past30use4 == 1|past30use4 == 2|past30use4 == 3|past30use4 == 4|past30use4 == 5 ~ 1,
+    past30use4 == 6|past30use4 == 7|past30use4 == 8|past30use4 == 9|past30use4 == 10 ~ 2,
+    past30use4 == 11|past30use4 == 12|past30use4 == 13|past30use4 == 14|past30use4 == 15|past30use4 == 16|past30use4 == 17|past30use4 == 18|past30use4 == 19|past30use4 == 20 ~ 3,
+    past30use4 == 21|past30use4 == 22|past30use4 == 23|past30use4 == 24|past30use4 == 25|past30use4 == 26|past30use4 == 27|past30use4 == 28|past30use4 == 29|past30use4 == 30 ~ 4),
+    past30use5= case_when(
+    past30use5 == 0 ~ 0,
+    past30use5 == 1|past30use5 == 2|past30use5 == 3|past30use5 == 4|past30use5 == 5 ~ 1,
+    past30use5 == 6|past30use5 == 7|past30use5 == 8|past30use5 == 9|past30use5 == 10 ~ 2,
+    past30use5 == 11|past30use5 == 12|past30use5 == 13|past30use5 == 14|past30use5 == 15|past30use5 == 16|past30use5 == 17|past30use5 == 18|past30use5 == 19|past30use5 == 20 ~ 3,
+    past30use5 == 21|past30use5 == 22|past30use5 == 23|past30use5 == 24|past30use5 == 25|past30use5 == 26|past30use5 == 27|past30use5 == 28|past30use5 == 29|past30use5 == 30 ~ 4),
+    past30use6= case_when(
+    past30use6 == 0 ~ 0,
+    past30use6 == 1|past30use6 == 2|past30use6 == 3|past30use6 == 4|past30use6 == 5 ~ 1,
+    past30use6 == 6|past30use6 == 7|past30use6 == 8|past30use6 == 9|past30use6 == 10 ~ 2,
+    past30use6 == 11|past30use6 == 12|past30use6 == 13|past30use6 == 14|past30use6 == 15|past30use6 == 16|past30use6 == 17|past30use6 == 18|past30use6 == 19|past30use6 == 20 ~ 3,
+    past30use6 == 21|past30use6 == 22|past30use6 == 23|past30use6 == 24|past30use6 == 25|past30use6 == 26|past30use6 == 27|past30use6 == 28|past30use6 == 29|past30use6 == 30 ~ 4),
+    past30use7= case_when(
+    past30use7 == 0 ~ 0,
+    past30use7 == 1|past30use7 == 2|past30use7 == 3|past30use7 == 4|past30use7 == 5 ~ 1,
+    past30use7 == 6|past30use7 == 7|past30use7 == 8|past30use7 == 9|past30use7 == 10 ~ 2,
+    past30use7 == 11|past30use7 == 12|past30use7 == 13|past30use7 == 14|past30use7 == 15|past30use7 == 16|past30use7 == 17|past30use7 == 18|past30use7 == 19|past30use7 == 20 ~ 3,
+    past30use7 == 21|past30use7 == 22|past30use7 == 23|past30use7 == 24|past30use7 == 25|past30use7 == 26|past30use7 == 27|past30use7 == 28|past30use7 == 29|past30use7 == 30 ~ 4),
+    past30use8= case_when(
+    past30use8 == 0 ~ 0,
+    past30use8 == 1|past30use8 == 2|past30use8 == 3|past30use8 == 4|past30use8 == 5 ~ 1,
+    past30use8 == 6|past30use8 == 7|past30use8 == 8|past30use8 == 9|past30use8 == 10 ~ 2,
+    past30use8 == 11|past30use8 == 12|past30use8 == 13|past30use8 == 14|past30use8 == 15|past30use8 == 16|past30use8 == 17|past30use8 == 18|past30use8 == 19|past30use8 == 20 ~ 3,
+    past30use8 == 21|past30use8 == 22|past30use8 == 23|past30use8 == 24|past30use8 == 25|past30use8 == 26|past30use8 == 27|past30use8 == 28|past30use8 == 29|past30use8 == 30 ~ 4),
+    past30use9= case_when(
+    past30use9 == 0 ~ 0,
+    past30use9 == 1|past30use9 == 2|past30use9 == 3|past30use9 == 4|past30use9 == 5 ~ 1,
+    past30use9 == 6|past30use9 == 7|past30use9 == 8|past30use9 == 9|past30use9 == 10 ~ 2,
+    past30use9 == 11|past30use9 == 12|past30use9 == 13|past30use9 == 14|past30use9 == 15|past30use9 == 16|past30use9 == 17|past30use9 == 18|past30use9 == 19|past30use9 == 20 ~ 3,
+    past30use9 == 21|past30use9 == 22|past30use9 == 23|past30use9 == 24|past30use9 == 25|past30use9 == 26|past30use9 == 27|past30use9 == 28|past30use9 == 29|past30use9 == 30 ~ 4),
+    past30use10= case_when(
+    past30use10 == 0 ~ 0,
+    past30use10 == 1|past30use10 == 2|past30use10 == 3|past30use10 == 4|past30use10 == 5 ~ 1,
+    past30use10 == 6|past30use10 == 7|past30use10 == 8|past30use10 == 9|past30use10 == 10 ~ 2,
+    past30use10 == 11|past30use10 == 12|past30use10 == 13|past30use10 == 14|past30use10 == 15|past30use10 == 16|past30use10 == 17|past30use10 == 18|past30use10 == 19|past30use10 == 20 ~ 3,
+    past30use10 == 21|past30use10 == 22|past30use10 == 23|past30use10 == 24|past30use10 == 25|past30use10 == 26|past30use10 == 27|past30use10 == 28|past30use10 == 29|past30use10 == 30 ~ 4),
+    past30use11= case_when(
+    past30use11 == 0 ~ 0,
+    past30use11 == 1|past30use11 == 2|past30use11 == 3|past30use11 == 4|past30use11 == 5 ~ 1,
+    past30use11 == 6|past30use11 == 7|past30use11 == 8|past30use11 == 9|past30use11 == 10 ~ 2,
+    past30use11 == 11|past30use11 == 12|past30use11 == 13|past30use11 == 14|past30use11 == 15|past30use11 == 16|past30use11 == 17|past30use11 == 18|past30use11 == 19|past30use11 == 20 ~ 3,
+    past30use11 == 21|past30use11 == 22|past30use11 == 23|past30use11 == 24|past30use11 == 25|past30use11 == 26|past30use11 == 27|past30use11 == 28|past30use11 == 29|past30use11 == 30 ~ 4)
+)
+```
+
+```{r}
+# split into 5 intervals
+gshs_08_14 <- gshs_08_14 %>%
+  mutate(past30act1= case_when(
+    past30act1 == 0 ~ 0,
+    past30act1 == 1|past30act1 == 2|past30act1 == 3|past30act1 == 4|past30act1 == 5 ~ 1,
+    past30act1 == 6|past30act1 == 7|past30act1 == 8|past30act1 == 9|past30act1 == 10 ~ 2,
+    past30act1 == 11|past30act1 == 12|past30act1 == 13|past30act1 == 14|past30act1 == 15|past30act1 == 16|past30act1 == 17|past30act1 == 18|past30act1 == 19|past30act1 == 20 ~ 3,
+    past30act1 == 21|past30act1 == 22|past30act1 == 23|past30act1 == 24|past30act1 == 25|past30act1 == 26|past30act1 == 27|past30act1 == 28|past30act1 == 29|past30act1 == 30 ~ 4),
+  past30act2= case_when(
+    past30act2 == 0 ~ 0,
+    past30act2 == 1|past30act2 == 2|past30act2 == 3|past30act2 == 4|past30act2 == 5 ~ 1,
+    past30act2 == 6|past30act2 == 7|past30act2 == 8|past30act2 == 9|past30act2 == 10 ~ 2,
+    past30act2 == 11|past30act2 == 12|past30act2 == 13|past30act2 == 14|past30act2 == 15|past30act2 == 16|past30act2 == 17|past30act2 == 18|past30act2 == 19|past30act2 == 20 ~ 3,
+    past30act2 == 21|past30act2 == 22|past30act2 == 23|past30act2 == 24|past30act2 == 25|past30act2 == 26|past30act2 == 27|past30act2 == 28|past30act2 == 29|past30act2 == 30 ~ 4),
+  past30act3= case_when(
+    past30act3 == 0 ~ 0,
+    past30act3 == 1|past30act3 == 2|past30act3 == 3|past30act3 == 4|past30act3 == 5 ~ 1,
+    past30act3 == 6|past30act3 == 7|past30act3 == 8|past30act3 == 9|past30act3 == 10 ~ 2,
+    past30act3 == 11|past30act3 == 12|past30act3 == 13|past30act3 == 14|past30act3 == 15|past30act3 == 16|past30act3 == 17|past30act3 == 18|past30act3 == 19|past30act3 == 20 ~ 3,
+    past30act3 == 21|past30act3 == 22|past30act3 == 23|past30act3 == 24|past30act3 == 25|past30act3 == 26|past30act3 == 27|past30act3 == 28|past30act3 == 29|past30act3 == 30 ~ 4),
+    past30act4= case_when(
+    past30act4 == 0 ~ 0,
+    past30act4 == 1|past30act4 == 2|past30act4 == 3|past30act4 == 4|past30act4 == 5 ~ 1,
+    past30act4 == 6|past30act4 == 7|past30act4 == 8|past30act4 == 9|past30act4 == 10 ~ 2,
+    past30act4 == 11|past30act4 == 12|past30act4 == 13|past30act4 == 14|past30act4 == 15|past30act4 == 16|past30act4 == 17|past30act4 == 18|past30act4 == 19|past30act4 == 20 ~ 3,
+    past30act4 == 21|past30act4 == 22|past30act4 == 23|past30act4 == 24|past30act4 == 25|past30act4 == 26|past30act4 == 27|past30act4 == 28|past30act4 == 29|past30act4 == 30 ~ 4),
+    past30act5= case_when(
+    past30act5 == 0 ~ 0,
+    past30act5 == 1|past30act5 == 2|past30act5 == 3|past30act5 == 4|past30act5 == 5 ~ 1,
+    past30act5 == 6|past30act5 == 7|past30act5 == 8|past30act5 == 9|past30act5 == 10 ~ 2,
+    past30act5 == 11|past30act5 == 12|past30act5 == 13|past30act5 == 14|past30act5 == 15|past30act5 == 16|past30act5 == 17|past30act5 == 18|past30act5 == 19|past30act5 == 20 ~ 3,
+    past30act5 == 21|past30act5 == 22|past30act5 == 23|past30act5 == 24|past30act5 == 25|past30act5 == 26|past30act5 == 27|past30act5 == 28|past30act5 == 29|past30act5 == 30 ~ 4),
+    past30act6= case_when(
+    past30act6 == 0 ~ 0,
+    past30act6 == 1|past30act6 == 2|past30act6 == 3|past30act6 == 4|past30act6 == 5 ~ 1,
+    past30act6 == 6|past30act6 == 7|past30act6 == 8|past30act6 == 9|past30act6 == 10 ~ 2,
+    past30act6 == 11|past30act6 == 12|past30act6 == 13|past30act6 == 14|past30act6 == 15|past30act6 == 16|past30act6 == 17|past30act6 == 18|past30act6 == 19|past30act6 == 20 ~ 3,
+    past30act6 == 21|past30act6 == 22|past30act6 == 23|past30act6 == 24|past30act6 == 25|past30act6 == 26|past30act6 == 27|past30act6 == 28|past30act6 == 29|past30act6 == 30 ~ 4),
+    past30act7= case_when(
+    past30act7 == 0 ~ 0,
+    past30act7 == 1|past30act7 == 2|past30act7 == 3|past30act7 == 4|past30act7 == 5 ~ 1,
+    past30act7 == 6|past30act7 == 7|past30act7 == 8|past30act7 == 9|past30act7 == 10 ~ 2,
+    past30act7 == 11|past30act7 == 12|past30act7 == 13|past30act7 == 14|past30act7 == 15|past30act7 == 16|past30act7 == 17|past30act7 == 18|past30act7 == 19|past30act7 == 20 ~ 3,
+    past30act7 == 21|past30act7 == 22|past30act7 == 23|past30act7 == 24|past30act7 == 25|past30act7 == 26|past30act7 == 27|past30act7 == 28|past30act7 == 29|past30act7 == 30 ~ 4))
+```
+
+```{r}
+# swap row values in the same column of a data frame
+gshs_08_14$adultsdisapprove1 <- chartr("14", "41", gshs_08_14$adultsdisapprove1)
+gshs_08_14$adultsdisapprove2 <- chartr("14", "41", gshs_08_14$adultsdisapprove2)
+gshs_08_14$adultsdisapprove3 <- chartr("14", "41", gshs_08_14$adultsdisapprove3)
+gshs_08_14$adultsdisapprove4 <- chartr("14", "41", gshs_08_14$adultsdisapprove4)
+gshs_08_14$adultsdisapprove1 <- chartr("23", "32", gshs_08_14$adultsdisapprove1)
+gshs_08_14$adultsdisapprove2 <- chartr("23", "32", gshs_08_14$adultsdisapprove2)
+gshs_08_14$adultsdisapprove3 <- chartr("23", "32", gshs_08_14$adultsdisapprove3)
+gshs_08_14$adultsdisapprove4 <- chartr("23", "32", gshs_08_14$adultsdisapprove4)
+```
+
+```{r}
+# merge strongly agree, somewhat agree, and somewhat disagree to 1 and strongly disagree to 0
+gshs_08_14$nutrition1 <- replace(gshs_08_14$nutrition1, gshs_08_14$nutrition1<4, 1)
+gshs_08_14$nutrition1 <- replace(gshs_08_14$nutrition1, gshs_08_14$nutrition1==4, 0)
+gshs_08_14$nutrition2 <- replace(gshs_08_14$nutrition2, gshs_08_14$nutrition2<4, 1)
+gshs_08_14$nutrition2 <- replace(gshs_08_14$nutrition2, gshs_08_14$nutrition2==4, 0)
+gshs_08_14$nutrition3 <- replace(gshs_08_14$nutrition3, gshs_08_14$nutrition3<4, 1)
+gshs_08_14$nutrition3 <- replace(gshs_08_14$nutrition3, gshs_08_14$nutrition3==4, 0)
+gshs_08_14$nutrition4 <- replace(gshs_08_14$nutrition4, gshs_08_14$nutrition4<4, 1)
+gshs_08_14$nutrition4 <- replace(gshs_08_14$nutrition4, gshs_08_14$nutrition4==4, 0)
+gshs_08_14$nutrition5 <- replace(gshs_08_14$nutrition5, gshs_08_14$nutrition5<4, 1)
+gshs_08_14$nutrition5 <- replace(gshs_08_14$nutrition5, gshs_08_14$nutrition5==4, 0)
+gshs_08_14$nutrition6 <- replace(gshs_08_14$nutrition6, gshs_08_14$nutrition6<4, 1)
+gshs_08_14$nutrition6 <- replace(gshs_08_14$nutrition6, gshs_08_14$nutrition6==4, 0)
+gshs_08_14$nutrition7 <- replace(gshs_08_14$nutrition7, gshs_08_14$nutrition7<4, 1)
+gshs_08_14$nutrition7 <- replace(gshs_08_14$nutrition7, gshs_08_14$nutrition7==4, 0)
+gshs_08_14$nutrition8 <- replace(gshs_08_14$nutrition8, gshs_08_14$nutrition8<4, 1)
+gshs_08_14$nutrition8 <- replace(gshs_08_14$nutrition8, gshs_08_14$nutrition8==4, 0)
+gshs_08_14$nutrition9 <- replace(gshs_08_14$nutrition9, gshs_08_14$nutrition9<4, 1)
+gshs_08_14$nutrition9 <- replace(gshs_08_14$nutrition9, gshs_08_14$nutrition9==4, 0)
+```
+
+```{r}
+# assign new interval
+gshs_08_14 <- gshs_08_14 %>%
+  mutate(misc8= case_when(
+    misc8 == 0 ~ 0,
+    misc8 == 1|misc8 == 2|misc8 == 3|misc8 == 4|misc8 == 5 ~ 1,
+    misc8 == 6|misc8 == 7|misc8 == 8|misc8 == 9|misc8 == 10 ~ 2,
+    misc8 == 11|misc8 == 12|misc8 == 13|misc8 == 14|misc8 == 15|misc8 == 16|misc8 == 17|misc8 == 18|misc8 == 19|misc8 == 20 ~ 3,
+    misc8 == 21|misc8 == 22|misc8 == 23|misc8 == 24|misc8 == 25|misc8 == 26|misc8 == 27|misc8 == 28|misc8 == 29|misc8 == 30 ~ 4),
+    misc9= case_when(
+    misc9 == 0 ~ 0,
+    misc9 == 1|misc9 == 2|misc9 == 3|misc9 == 4|misc9 == 5 ~ 1,
+    misc9 == 6|misc9 == 7|misc9 == 8|misc9 == 9|misc9 == 10 ~ 2,
+    misc9 == 11|misc9 == 12|misc9 == 13|misc9 == 14|misc9 == 15|misc9 == 16|misc9 == 17|misc9 == 18|misc9 == 19|misc9 == 20 ~ 3,
+    misc9 == 21|misc9 == 22|misc9 == 23|misc9 == 24|misc9 == 25|misc9 == 26|misc9 == 27|misc9 == 28|misc9 == 29|misc9 == 30 ~ 4),
+    misc10= case_when(
+    misc10 == 0 ~ 0,
+    misc10 == 1|misc10 == 2|misc10 == 3|misc10 == 4|misc10 == 5 ~ 1,
+    misc10 == 6|misc10 == 7|misc10 == 8|misc10 == 9|misc10 == 10 ~ 2,
+    misc10 == 11|misc10 == 12|misc10 == 13|misc10 == 14|misc10 == 15|misc10 == 16|misc10 == 17|misc10 == 18|misc10 == 19|misc10 == 20 ~ 3,
+    misc10 == 21|misc10 == 22|misc10 == 23|misc10 == 24|misc10 == 25|misc10 == 26|misc10 == 27|misc10 == 28|misc10 == 29|misc10 == 30 ~ 4))
+```
+
+```{r}
+# switch the position of the last two columns
+gshs_08_14 <- add_column(gshs_08_14, school_1 = gshs_08_14$school, .after = "misc12")
+gshs_08_14 <- add_column(gshs_08_14, school_2 = gshs_08_14$school2, .after = "school_1")
+gshs_08_14 <- gshs_08_14 %>%
+  select(-school, 
+         -school2)
+```
+
+```{r}
+# rename the column name
+st <- NA
+for (i in 1:9) {
+  st[i] <- paste0("question_00", i)
+}
+st1 <- NA
+str1 <- c(10:99)
+for (i in str1) {
+  st1[i] <- paste0("question_0", i)
+}
+st1 <- st1[!is.na(st1)]
+st2 <- NA
+str2 <- c(100:122)
+for (i in str2) {
+  st2[i] <- paste0("question_", i)
+}
+st2 <- st2[!is.na(st2)]
+colnames(gshs_08_14) <- c("sysschoolid",	"year",	"system_id",	"school_dstrct_nm",	"school_id",	"schoolnme",	"grade", "gender", st, st1, st2, "school", "school2")
+```
+
+```{r}
+# switch the two specific columns to the last
+gshs_08_14 <- add_column(gshs_08_14, school_1 = gshs_08_14$school, .after = "misc12")
+gshs_08_14 <- add_column(gshs_08_14, school_2 = gshs_08_14$school2, .after = "school_1")
+```
+
+```{r}
+# swap columns in order to match the 15_20 data
+gshs_08_14 <- add_column(gshs_08_14, question4 = gshs_08_14$question_002, .after = "question_004")
+gshs_08_14 <- add_column(gshs_08_14, question6 = gshs_08_14$question_102, .after = "question_006")
+
+gshs_08_14 <- add_column(gshs_08_14, question11 = gshs_08_14$question_006, .after = "question_011")
+gshs_08_14 <- add_column(gshs_08_14, question34 = gshs_08_14$question_112, .after = "question_034")
+gshs_08_14 <- add_column(gshs_08_14, question39 = gshs_08_14$question_076, .after = "question_039")
+gshs_08_14 <- add_column(gshs_08_14, question40 = gshs_08_14$question_070, .after = "question_040")
+gshs_08_14 <- add_column(gshs_08_14, question51 = gshs_08_14$question_010, .after = "question_051")
+gshs_08_14 <- add_column(gshs_08_14, question52 = gshs_08_14$question_011, .after = "question_052")
+gshs_08_14 <- add_column(gshs_08_14, question53 = gshs_08_14$question_012, .after = "question_053")
+gshs_08_14 <- add_column(gshs_08_14, question55 = gshs_08_14$question_013, .after = "question_055")
+gshs_08_14 <- add_column(gshs_08_14, question56 = gshs_08_14$question_101, .after = "question_056")
+gshs_08_14 <- add_column(gshs_08_14, question57 = gshs_08_14$question_018, .after = "question_057")
+gshs_08_14 <- add_column(gshs_08_14, question58 = gshs_08_14$question_118, .after = "question_058")
+gshs_08_14 <- add_column(gshs_08_14, question59 = gshs_08_14$question_119, .after = "question_059")
+gshs_08_14 <- add_column(gshs_08_14, question61 = gshs_08_14$question_120, .after = "question_061")
+gshs_08_14 <- add_column(gshs_08_14, question62 = gshs_08_14$question_020, .after = "question_062")
+gshs_08_14 <- add_column(gshs_08_14, question63 = gshs_08_14$question_121, .after = "question_063")
+gshs_08_14 <- add_column(gshs_08_14, question64 = gshs_08_14$question_081, .after = "question_064")
+gshs_08_14 <- add_column(gshs_08_14, question66 = gshs_08_14$question_095, .after = "question_066")
+gshs_08_14 <- add_column(gshs_08_14, question67 = gshs_08_14$question_086, .after = "question_067")
+
+gshs_08_14 <- add_column(gshs_08_14, question68 = gshs_08_14$question_087, .after = "question_068")
+gshs_08_14 <- add_column(gshs_08_14, question69 = gshs_08_14$question_088, .after = "question_069")
+gshs_08_14 <- add_column(gshs_08_14, question70 = gshs_08_14$question_089, .after = "question_070")
+gshs_08_14 <- add_column(gshs_08_14, question71 = gshs_08_14$question_090, .after = "question_071")
+gshs_08_14 <- add_column(gshs_08_14, question72 = gshs_08_14$question_099, .after = "question_072")
+gshs_08_14 <- add_column(gshs_08_14, question73 = gshs_08_14$question_100, .after = "question_073")
+gshs_08_14 <- add_column(gshs_08_14, question74 = gshs_08_14$question_063, .after = "question_074")
+gshs_08_14 <- add_column(gshs_08_14, question75 = gshs_08_14$question_072, .after = "question_075")
+gshs_08_14 <- add_column(gshs_08_14, question76 = gshs_08_14$question_074, .after = "question_076")
+gshs_08_14 <- add_column(gshs_08_14, question77 = gshs_08_14$question_075, .after = "question_077")
+
+gshs_08_14 <- add_column(gshs_08_14, question78 = gshs_08_14$question_111, .after = "question_078")
+gshs_08_14 <- add_column(gshs_08_14, question79 = gshs_08_14$question_122, .after = "question_079")
+gshs_08_14 <- add_column(gshs_08_14, question82 = gshs_08_14$question_113, .after = "question_082")
+gshs_08_14 <- add_column(gshs_08_14, question84 = gshs_08_14$question_114, .after = "question_084")
+gshs_08_14 <- add_column(gshs_08_14, question86 = gshs_08_14$question_115, .after = "question_086")
+gshs_08_14 <- add_column(gshs_08_14, question88 = gshs_08_14$question_003, .after = "question_088")
+gshs_08_14 <- add_column(gshs_08_14, question89 = gshs_08_14$question_004, .after = "question_089")
+gshs_08_14 <- add_column(gshs_08_14, question90 = gshs_08_14$question_007, .after = "question_090")
+gshs_08_14 <- add_column(gshs_08_14, question91 = gshs_08_14$question_008, .after = "question_091")
+gshs_08_14 <- add_column(gshs_08_14, question92 = gshs_08_14$question_117, .after = "question_092")
+
+gshs_08_14 <- add_column(gshs_08_14, question93 = gshs_08_14$question_005, .after = "question_093")
+gshs_08_14 <- add_column(gshs_08_14, question94 = gshs_08_14$question_103, .after = "question_094")
+gshs_08_14 <- add_column(gshs_08_14, question95 = gshs_08_14$question_032, .after = "question_095")
+gshs_08_14 <- add_column(gshs_08_14, question96 = gshs_08_14$question_033, .after = "question_096")
+gshs_08_14 <- add_column(gshs_08_14, question97 = gshs_08_14$question_034, .after = "question_097")
+gshs_08_14 <- add_column(gshs_08_14, question98 = gshs_08_14$question_035, .after = "question_098")
+gshs_08_14 <- add_column(gshs_08_14, question99 = gshs_08_14$question_040, .after = "question_099")
+gshs_08_14 <- add_column(gshs_08_14, question101 = gshs_08_14$question_042, .after = "question_101")
+gshs_08_14 <- add_column(gshs_08_14, question107 = gshs_08_14$question_054, .after = "question_107")
+gshs_08_14 <- add_column(gshs_08_14, question108 = gshs_08_14$question_055, .after = "question_108")
+
+gshs_08_14 <- add_column(gshs_08_14, question109 = gshs_08_14$question_056, .after = "question_109")
+gshs_08_14 <- add_column(gshs_08_14, question110 = gshs_08_14$question_057, .after = "question_110")
+gshs_08_14 <- add_column(gshs_08_14, question111 = gshs_08_14$question_058, .after = "question_111")
+gshs_08_14 <- add_column(gshs_08_14, question112 = gshs_08_14$question_059, .after = "question_112")
+gshs_08_14 <- add_column(gshs_08_14, question113 = gshs_08_14$question_060, .after = "question_113")
+gshs_08_14 <- add_column(gshs_08_14, question114 = gshs_08_14$question_061, .after = "question_114")
+
+gshs_08_14 <- gshs_08_14 %>%
+  select(-question_004, -question_006, -question_011, -question_034, -question_039, 
+         -question_040, -question_051, -question_052, -question_053, -question_055,
+         -question_056, -question_057, -question_058, -question_059, -question_061,
+         -question_062, -question_063, -question_064, -question_066, -question_067, 
+         -question_068, -question_069, -question_070, -question_071, -question_072, 
+         -question_073, -question_074, -question_075, -question_076, -question_077, 
+         -question_078, -question_079, -question_082, -question_084, -question_086, 
+         -question_088, -question_089, -question_090, -question_091, -question_092, 
+         -question_093, -question_094, -question_095, -question_096, -question_097, 
+         -question_098, -question_099, -question_101, -question_107, -question_108, 
+         -question_109, -question_110, -question_111, -question_112, -question_113, 
+         -question_114)
+```
+
+```{r}
+# change the column names back
+colnames(gshs_08_14) <- c("sysschoolid",	"year",	"system_id",	"school_dstrct_nm",	"school_id",	"schoolnme",	"grade", "gender", st, st1, st2, "school", "school2")
+```
+
+```{r}
+# assign nas to columns that does not exist in the year of 15~20 dataset
+gshs_08_14[,10:11] <- NA
+gshs_08_14[,13] <- NA
+gshs_08_14[,15:18] <- NA
+gshs_08_14[,20:41] <- NA
+gshs_08_14[,43:46] <- NA
+gshs_08_14[,49:58] <- NA
+gshs_08_14[,62] <- NA
+gshs_08_14[,68] <- NA
+gshs_08_14[,73] <- NA
+gshs_08_14[,88:89] <- NA
+gshs_08_14[,91] <- NA
+gshs_08_14[,93] <- NA
+gshs_08_14[,95] <- NA
+gshs_08_14[,108] <- NA
+gshs_08_14[,111:114] <- NA
+gshs_08_14[,123:130] <- NA
+```
+
+```{r}
+write.csv(gshs_08_14,"~/Desktop/INTERNSHIP/data/new_gshs_08_14.csv", row.names = FALSE)
+```
+
+
+
+
+
